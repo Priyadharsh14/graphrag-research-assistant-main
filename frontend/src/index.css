@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  /* Signature palette — grounded in the research/graph subject, not a generic SaaS default */
+  --color-ink: #14151f;
+  --color-ink-soft: #565a6e;
+  --color-ink-faint: #8b8fa3;
+  --color-paper: #fafaf7;
+  --color-paper-dim: #f0efe9;
+  --color-surface: #ffffff;
+  --color-graph: #5b54e8;
+  --color-graph-soft: #ebe9fd;
+  --color-citation: #c08a2e;
+  --color-citation-soft: #f7ecd6;
+  --color-success: #3f8f5f;
+  --color-success-soft: #e4f2e9;
+  --color-danger: #c1483c;
+  --color-danger-soft: #fbe9e6;
+  --color-border: #e4e2da;
+
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+}
+
+/* Dark theme overrides — applied via [data-theme="dark"] on <html> */
+[data-theme="dark"] {
+  --color-ink: #e9e9f0;
+  --color-ink-soft: #a6a9ba;
+  --color-ink-faint: #6d7086;
+  --color-paper: #0f0f16;
+  --color-paper-dim: #17171f;
+  --color-surface: #1a1b25;
+  --color-graph: #8b85ff;
+  --color-graph-soft: #24234a;
+  --color-citation: #e0ab52;
+  --color-citation-soft: #362b13;
+  --color-success: #5fbf85;
+  --color-success-soft: #163325;
+  --color-danger: #e17569;
+  --color-danger-soft: #3a1e1c;
+  --color-border: #2a2b38;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-graph);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Signature: graph-thread divider — dotted connector echoing knowledge-graph edges */
+.thread-divider {
+  height: 1px;
+  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1.5px);
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 1.8s ease-in-out infinite;
+}

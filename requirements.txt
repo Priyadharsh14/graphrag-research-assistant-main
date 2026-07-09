@@ -1,0 +1,14 @@
+# Streamlit Community Cloud deployment (standalone mode).
+# The app entrypoint is streamlit_app/app.py; with no API_BASE_URL set, the
+# app auto-selects the in-process standalone engine, which needs these deps.
+# (Docker deployments use streamlit_app/requirements.txt instead, which stays
+# lean because the heavy work happens in the backend containers.)
+--extra-index-url https://download.pytorch.org/whl/cpu
+streamlit==1.58.0
+requests==2.32.3
+python-docx==1.1.2
+PyMuPDF==1.24.14
+sentence-transformers==3.3.1
+groq==0.11.0
+numpy>=1.26,<2.0
+torch>=2.2.0,<2.6.0
