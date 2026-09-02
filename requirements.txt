@@ -10,5 +10,6 @@ python-docx==1.1.2
 PyMuPDF==1.24.14
 sentence-transformers==3.3.1
 groq==0.11.0
+openai==1.47.1
 numpy>=1.26,<2.0
 torch>=2.2.0,<2.6.0

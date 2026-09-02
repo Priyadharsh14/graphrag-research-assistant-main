@@ -21,13 +21,19 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
 
     # --- LLM Providers ---
-    LLM_PROVIDER: Literal["groq", "openai"] = "groq"
+    LLM_PROVIDER: Literal["groq", "openai", "gemini"] = "gemini"
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
     GROQ_EXTRACTION_MODEL: str = "llama-3.1-8b-instant"
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
     OPENAI_EXTRACTION_MODEL: str = "gpt-4o-mini"
+    # Gemini is reached through Google's OpenAI-compatible endpoint, so it
+    # reuses the `openai` SDK below rather than needing its own client lib.
+    GEMINI_API_KEY: str = ""
+    GEMINI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_EXTRACTION_MODEL: str = "gemini-2.5-flash-lite"
 
     # --- Embeddings ---
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"

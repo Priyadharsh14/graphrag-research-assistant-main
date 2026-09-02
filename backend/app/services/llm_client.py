@@ -36,6 +36,14 @@ class LLMClient:
             self._client = Groq(api_key=settings.GROQ_API_KEY)
             self._model = settings.GROQ_MODEL
             self._extraction_model = settings.GROQ_EXTRACTION_MODEL
+        elif self.provider == "gemini":
+            # Google's OpenAI-compatible endpoint means the `openai` client
+            # works unchanged -- just point base_url at Gemini and use a
+            # Gemini model name.
+            from openai import OpenAI
+            self._client = OpenAI(api_key=settings.GEMINI_API_KEY, base_url=settings.GEMINI_BASE_URL)
+            self._model = settings.GEMINI_MODEL
+            self._extraction_model = settings.GEMINI_EXTRACTION_MODEL
         else:
             from openai import OpenAI
             self._client = OpenAI(api_key=settings.OPENAI_API_KEY)

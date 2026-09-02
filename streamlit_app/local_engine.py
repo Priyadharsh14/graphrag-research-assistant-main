@@ -40,6 +40,13 @@ class APIError(Exception):
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
 GROQ_EXTRACTION_MODEL = "llama-3.1-8b-instant"
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+GEMINI_MODEL = "gemini-3.6-flash"
+GEMINI_EXTRACTION_MODEL = "gemini-3.5-flash-lite"
+# Which provider to use is itself a secret/env var so a public deployment
+# can be repointed without a code change -- set LLM_PROVIDER = "groq" to
+# go back to Groq once it has a key again.
+DEFAULT_PROVIDER = "gemini"
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 CHUNK_CHARS = 2000
 OVERLAP_CHARS = 250
@@ -69,16 +76,30 @@ def _embed(texts: list[str]) -> np.ndarray:
 
 
 def _complete(system: str, user: str, max_tokens: int = 1500, temperature: float = 0.2,
-              model: str | None = None, json_mode: bool = False) -> str:
-    key = _get_secret("GROQ_API_KEY")
-    if not key:
-        raise APIError(503, "GROQ_API_KEY is not configured. Add it in the app's secrets settings.")
-    from groq import Groq
-
+              model: str | None = None, extraction: bool = False, json_mode: bool = False) -> str:
+    provider = (_get_secret("LLM_PROVIDER") or DEFAULT_PROVIDER).lower()
     kwargs = {"response_format": {"type": "json_object"}} if json_mode else {}
+
+    if provider == "groq":
+        key = _get_secret("GROQ_API_KEY")
+        if not key:
+            raise APIError(503, "GROQ_API_KEY is not configured. Add it in the app's secrets settings.")
+        from groq import Groq
+        client = Groq(api_key=key)
+        resolved_model = model or (GROQ_EXTRACTION_MODEL if extraction else GROQ_MODEL)
+    else:
+        # Gemini via Google's OpenAI-compatible endpoint -- same `openai`
+        # client either way, just a different base_url + key + model name.
+        key = _get_secret("GEMINI_API_KEY")
+        if not key:
+            raise APIError(503, "GEMINI_API_KEY is not configured. Add it in the app's secrets settings.")
+        from openai import OpenAI
+        client = OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
+        resolved_model = model or (GEMINI_EXTRACTION_MODEL if extraction else GEMINI_MODEL)
+
     try:
-        resp = Groq(api_key=key).chat.completions.create(
-            model=model or GROQ_MODEL,
+        resp = client.chat.completions.create(
+            model=resolved_model,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
             temperature=temperature,
             max_tokens=max_tokens,
@@ -202,7 +223,7 @@ def _extract_entities(chunks: list[dict]) -> tuple[dict[int, list], list[dict]]:
         batch = eligible[i : i + EXTRACTION_BATCH_SIZE]
         numbered = "\n\n".join(f"=== CHUNK {c['index']} ===\n{c['text'][:3000]}" for c in batch)
         try:
-            raw = _complete(_EXTRACTION_PROMPT, numbered, model=GROQ_EXTRACTION_MODEL,
+            raw = _complete(_EXTRACTION_PROMPT, numbered, extraction=True,
                             json_mode=True, temperature=0.0,
                             max_tokens=400 * len(batch) + 200)
             parsed = json.loads(raw)

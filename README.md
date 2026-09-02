@@ -78,7 +78,8 @@ Pick whichever you want to run — `docker compose up` starts both by default (t
 ## Running it
 
 ### Prerequisites
-Docker and Docker Compose. A Groq API key (free tier works) or an OpenAI key.
+Docker and Docker Compose. A Gemini API key (free tier works, get one at
+https://aistudio.google.com/apikey), or a Groq/OpenAI key.
 
 ### Quickstart
 
@@ -86,7 +87,7 @@ Docker and Docker Compose. A Groq API key (free tier works) or an OpenAI key.
 git clone <this-repo>
 cd graphrag-assistant
 cp .env.example .env
-# Edit .env and set GROQ_API_KEY (or switch LLM_PROVIDER=openai and set OPENAI_API_KEY)
+# Edit .env and set GEMINI_API_KEY (or switch LLM_PROVIDER=groq/openai and set the matching key)
 
 docker compose up --build
 ```
@@ -134,8 +135,9 @@ The Streamlit app has a dual-mode design (`streamlit_app/engine.py`): with
 `API_BASE_URL` set it is a thin client for the full backend, and without it
 (or with `STANDALONE_MODE=true`) it runs the entire pipeline in-process via
 `streamlit_app/local_engine.py` — PyMuPDF parsing, sentence-transformers
-embeddings, in-memory cosine-similarity retrieval, batched Groq entity
-extraction, and graph-relationship context in every answer. No Docker,
+embeddings, in-memory cosine-similarity retrieval, batched entity
+extraction (Gemini by default, Groq optional), and graph-relationship
+context in every answer. No Docker,
 Neo4j, Qdrant, Redis, or Celery required.
 
 To deploy on Streamlit Community Cloud:
@@ -145,8 +147,10 @@ To deploy on Streamlit Community Cloud:
    **main file path** `streamlit_app/app.py`.
 3. In the app's **Secrets**, add:
    ```toml
-   GROQ_API_KEY = "your_groq_api_key"
+   GEMINI_API_KEY = "your_gemini_api_key"
    ```
+   (Get a free key at https://aistudio.google.com/apikey. To use Groq
+   instead, set `LLM_PROVIDER = "groq"` and `GROQ_API_KEY = "..."`.)
 4. Deploy. Dependencies install from the root `requirements.txt` (CPU-only
    torch is pinned there to keep the install within free-tier limits).
 
