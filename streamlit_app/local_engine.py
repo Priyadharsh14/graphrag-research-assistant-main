@@ -97,20 +97,32 @@ def _complete(system: str, user: str, max_tokens: int = 1500, temperature: float
         client = OpenAI(api_key=key, base_url=GEMINI_BASE_URL)
         resolved_model = model or (GEMINI_EXTRACTION_MODEL if extraction else GEMINI_MODEL)
 
-    try:
-        resp = client.chat.completions.create(
-            model=resolved_model,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-            temperature=temperature,
-            max_tokens=max_tokens,
-            **kwargs,
-        )
-        return resp.choices[0].message.content or ""
-    except Exception as exc:
-        message = str(exc)
-        if "rate_limit" in message or "429" in message:
-            raise APIError(429, "LLM rate limit reached. Wait for the quota to reset and try again.")
-        raise APIError(502, f"LLM call failed: {message[:300]}")
+    # Groq's free tier has a separate quota per model, so on a rate limit
+    # retry once with the other GPT-OSS model before giving up.
+    candidates = [resolved_model]
+    if provider == "groq" and model is None:
+        other = GROQ_EXTRACTION_MODEL if resolved_model == GROQ_MODEL else GROQ_MODEL
+        candidates.append(other)
+
+    message = ""
+    for i, candidate in enumerate(candidates):
+        try:
+            resp = client.chat.completions.create(
+                model=candidate,
+                messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs,
+            )
+            return resp.choices[0].message.content or ""
+        except Exception as exc:
+            message = str(exc)
+            if ("rate_limit" in message or "429" in message) and i < len(candidates) - 1:
+                continue
+            break
+    if "rate_limit" in message or "429" in message:
+        raise APIError(429, "LLM rate limit reached. Wait for the quota to reset and try again.")
+    raise APIError(502, f"LLM call failed: {message[:300]}")
 
 
 # --------------------------------------------------------------------------
