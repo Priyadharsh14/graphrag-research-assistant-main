@@ -38,8 +38,8 @@ class APIError(Exception):
 # Configuration / model access
 # --------------------------------------------------------------------------
 
-GROQ_MODEL = "llama-3.3-70b-versatile"
-GROQ_EXTRACTION_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = "openai/gpt-oss-120b"
+GROQ_EXTRACTION_MODEL = "openai/gpt-oss-20b"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 GEMINI_MODEL = "gemini-3.6-flash"
 GEMINI_EXTRACTION_MODEL = "gemini-3.5-flash-lite"

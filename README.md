@@ -45,7 +45,7 @@ answers with inline citations back to `[paper_id, chunk_index, page]`.
 | Knowledge graph | Neo4j 5 |
 | Vector index | Qdrant |
 | Embeddings | Sentence Transformers (`BAAI/bge-small-en-v1.5`, swappable) |
-| LLM | Groq (Llama 3.3 70B) or OpenAI — provider-switchable via config |
+| LLM | Groq (GPT-OSS 120B) or OpenAI — provider-switchable via config |
 | Orchestration | LangGraph |
 | Testing | pytest (backend), oxlint + tsc (frontend) |
 | CI/CD | GitHub Actions (test → lint → build → docker build) |
